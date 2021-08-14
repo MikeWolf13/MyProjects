@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>User management API</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    
+    <link href="{{ url_for('static', filename='theme.css') }}" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <!-- Fixed navbar -->
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">User management API:</a>
+        </div>
+        <div id="navbar" class="navbar-nav mr-auto">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    <div class="container theme-showcase" role="main">
+
+      <div class="page-header">
+        <h1>List of users:</h1>
+      </div>
+      <form class="form-horizontal" method="POST" action="{{ url_for('index') }}"> 
+        <fieldset>
+          <div class="form-group">
+            <label for="find_user" class="col-lg-2 control-label" style="font-size: 1em;">Search by username:</label>
+            <div class="col-lg-3">
+              <input type="text" class="form-control" name="find_user" placeholder="Username">
+            </div>
+          </div>
+        </fieldset>
+      </form>
+      {% if error %}
+      <div style="color: red;">{{ error }}</div>
+      {% endif %}
+      {% for user in users %}
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="list-group">
+            <div class="list-group-item"> 
+              <table style="width: 100%;">
+                <tr>
+                  <td style="width: 45%;">
+                    <h4 class="list-group-item-heading">First name: {{ user.firstname }} </h4>
+                    <h4 class="list-group-item-heading">Last name: {{ user.lastname }} </h4>
+                    <h5 class="list-group-item-text">Username: {{ user.username }}</h5>
+                  </td>
+                  <td style="float: left;">
+                    <ul>
+                      {% for email in user.emails.all() %}
+                      {% if email.user_id == user.id %}
+                      <li><h5>{{ email.email }}</h5></li>
+                      {% endif %}
+                      {% endfor %}
+                    </ul>
+                  </td>
+                  <td style="width: 15%;"><a href="{{ url_for('edit', user_id=user.id) }}"  class="btn btn-primary" style="float: right;">Edit user</a></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div><!-- /.col-lg-12 -->
+      </div>
+      {% endfor %}
+
+    </div> <!-- /container -->
+
+  </body>
+</html>
