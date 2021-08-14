@@ -4,8 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 import os
 
-from sqlalchemy.sql.expression import false, true
-
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 app.config['SECRET_KEY'] = os.urandom(24)
