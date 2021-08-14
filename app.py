@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 import os
 
+from sqlalchemy.sql.functions import count
+
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -12,7 +14,7 @@ db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-
+    
     if request.method == 'GET':
         users = Users.query.order_by(Users.firstname).all()
         return render_template('home.html', users=users)
@@ -23,8 +25,8 @@ def index():
             return render_template('home.html', users=users)
         else:
             find_user = request.form['find_user']
+            #if request.form['search_by'] == '1':
             users = Users.query.order_by(Users.firstname).filter(Users.username.like("%" + find_user + "%")).all()
-
             if users:
                 return render_template('home.html', users=users)
             else:

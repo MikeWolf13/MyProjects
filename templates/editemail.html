@@ -40,9 +40,10 @@
       <form class="form-horizontal" method="POST" action="{{ url_for('editemail', user=user, user_id=user.id) }}"> 
         <fieldset>
           <div class="form-group">
-            <label for="find_user" class="col-lg-2 control-label" style="font-size: 1em;">Enter e-mail to add:<br/><i style="font-size: 0.75em;">(press Enter to submit)</i></label>
-            <div class="col-lg-6">
-              <input type="text" class="form-control" name="email" value="">
+            <label for="find_user" class="col-lg-2 control-label" style="font-size: 1em;">Enter email to add:</label>
+            <div>
+              <div class="col-lg-6" style="float: left;"><input type="text" class="form-control" name="email" placeholder="Email"></div>
+              <div><button type="submit" class="btn btn-primary">Add</button></div>
             </div>
           </div>
         </fieldset>
