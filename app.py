@@ -16,15 +16,23 @@ db = SQLAlchemy(app)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    
+    sel1 = ""
+    sel2 = ""
+
     if request.method == 'GET':
+        sel1 = "selected"
         users = Users.query.order_by(Users.firstname).all()
-        return render_template('home.html', users=users)
+        return render_template('home.html', sel1=sel1, sel2=sel2, users=users)
     
     if request.method == 'POST':
+        if request.form['search_by'] == '1':
+            sel1 = "selected"
+        if request.form['search_by'] == '2':
+            sel2 = "selected"
+
         if request.form['find_user'] == '' or request.form['find_user'] == None:
             users = Users.query.order_by(Users.firstname).all()
-            return render_template('home.html', users=users)
+            return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], users=users)
         else:
             find_user = request.form['find_user']
             if request.form['search_by'] == '1':
@@ -35,9 +43,9 @@ def index():
                 users = db.session.query(Users).order_by(Users.firstname).filter(Users.id.in_(subquery)).all()
                 
             if users:
-                return render_template('home.html', users=users)
+                return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], users=users)
             else:
-                return render_template('home.html', error="No users found")
+                return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], error="No users found")
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -49,8 +57,8 @@ def register():
             return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Username already in use!")
 
         # check if email is unique
-        if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Email is already in use!")
+        #if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
+            #return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Email is already in use!")
         
         if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "" or request.form['email'] == "":
             return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Please fill in all fields for registration!")
@@ -96,7 +104,7 @@ def edit(user_id,delete):
         if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "":
             return render_template('edit.html', popText="TEXT", user=user, error="No fields should be left blank!")
 
-        user.username = request.form['username']
+        #user.username = request.form['username']
         user.firstname = request.form['firstname']
         user.lastname = request.form['lastname']
         db.session.commit()
@@ -154,7 +162,7 @@ class Users(db.Model):
 
 class Emaildb(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(120), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 #==============================================================================
 if __name__ == '__main__':

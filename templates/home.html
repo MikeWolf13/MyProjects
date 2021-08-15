@@ -41,8 +41,8 @@
           <div class="form-group">
             <label for="find_user" class="col-lg-3 control-label" style="font-size: 1em;"><img src="{{ url_for('static', filename='search.png') }}" height="13px" style="vertical-align: baseline;"> Search by:
               <select name='search_by' style="color: black;">
-                <option value="1">username</option>
-                <option value="2">email</option>
+                <option value="1" {{ sel1 }}>username</option>
+                <option value="2" {{ sel2 }}>email</option>
               </select>
             </label>
             <div>
