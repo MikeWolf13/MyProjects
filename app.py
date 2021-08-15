@@ -87,15 +87,6 @@ def edit(user_id,do_delete):
         db.session.commit()
         return render_template("edit.html", do_delete=do_delete, error="User \"{}\" deleted!".format(user.username))
 
-    if edit_email:
-        user=Users.query.filter(Users.id == user_id).first()
-        emails=Emaildb.query.filter(Emaildb.user_id == user_id).all()
-        db.session.delete(user)
-        for email in emails:
-            db.session.delete(email)
-        db.session.commit()
-        return render_template("edit.html", do_delete=do_delete, error="User \"{}\" deleted!".format(user.username))
-
     if request.method == "GET" and not(do_delete):
         return render_template('edit.html', user=user)
 
@@ -111,7 +102,40 @@ def edit(user_id,do_delete):
 #============================================================================
 #                           EDIT EMAILS PAGE
 #============================================================================
-@app.route('/editemail/<user_id>/<delete_email>', methods=['GET', 'POST'])
+@app.route('/emailcontrol/<user_id>/<delete_email>', methods=['GET', 'POST'])
+@app.route('/emailcontrol/<user_id>', methods=['GET', 'POST'], defaults={'delete_email': ''})
+def emailcontrol(user_id,delete_email):
+    user=Users.query.filter(Users.id == user_id).first()
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    
+    if not(delete_email == '' or delete_email == None):
+        if Emaildb.query.filter(Emaildb.user_id == user_id).count() > 1:
+            email=Emaildb.query.filter(Emaildb.email == delete_email).one()
+            db.session.delete(email)
+            db.session.commit()
+            return render_template("emailcontrol.html", user=user, user_id=user_id, error="Email \"{}\" deleted!".format(email.email))
+        
+        return render_template("emailcontrol.html", user=user, user_id=user_id, error="User must have at least one e-mail")
+
+    if request.method == 'GET':
+        return render_template('emailcontrol.html', user=user)
+
+    if request.method == 'POST':
+        if request.form['email'] == '' or request.form['email'] == None:
+            return render_template('emailcontrol.html', user=user)
+
+        if not(re.fullmatch(regex, request.form['email'])):
+            return render_template('emailcontrol.html', user=user, error="Please enter a valid e-mail!")
+
+        if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
+            print(request.form['email'])
+            return render_template('emailcontrol.html', user=user, error="Email is already in use!")
+
+        addEmail = Emaildb(email=request.form['email'], user_id=user_id)
+        db.session.add(addEmail)
+        db.session.commit()
+        return render_template('emailcontrol.html', user=user)
+
 @app.route('/editemail/<user_id>', methods=['GET', 'POST'], defaults={'delete_email': ''})
 def editemail(user_id,delete_email):
     user=Users.query.filter(Users.id == user_id).first()
