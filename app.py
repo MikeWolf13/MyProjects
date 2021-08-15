@@ -27,6 +27,16 @@ def index():
             find_user = request.form['find_user']
             #if request.form['search_by'] == '1':
             users = Users.query.order_by(Users.firstname).filter(Users.username.like("%" + find_user + "%")).all()
+            '''
+            if request.form['search_by'] == '2':
+                emails = Emaildb.query.filter(Emaildb.email.like("%" + find_user + "%")).all()
+                print (len(emails))
+                if len(emails) == 0:
+                for x in range(1,len(emails) - 1) :
+                    users += Users.query.order_by(Users.firstname).filter(Users.id == emails[x].user_id).all()
+                    print (emails[x].user_id)
+                    print (x)
+            '''
             if users:
                 return render_template('home.html', users=users)
             else:
@@ -37,19 +47,24 @@ def register():
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
     if request.method == 'POST':
+        prev_user = request.form['username']
+        prev_first = request.form['firstname']
+        prev_last = request.form['lastname']
+        prev_email = request.form['email']
+
         # check if username is unique
         if (Users.query.filter(func.lower(Users.username) == func.lower(request.form['username'])).count() >= 1):
-            return render_template('register.html', error="Username already in use!")
+            return render_template('register.html', prev_user = prev_user, prev_first = prev_first, prev_last = prev_last, prev_email = prev_email, error="Username already in use!")
 
         # check if email is unique
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            return render_template('register.html', error="Email is already in use!")
+            return render_template('register.html', prev_user = prev_user, prev_first = prev_first, prev_last = prev_last, prev_email = prev_email, error="Email is already in use!")
         
         if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "" or request.form['email'] == "":
-            return render_template('register.html', error="Please fill in all fields for registration!")
+            return render_template('register.html', prev_user = prev_user, prev_first = prev_first, prev_last = prev_last, prev_email = prev_email, error="Please fill in all fields for registration!")
         
         if not(re.fullmatch(regex, request.form['email'])):
-            return render_template('register.html', error="Please enter a valid e-mail!")
+            return render_template('register.html', prev_user = prev_user, prev_first = prev_first, prev_last = prev_last, prev_email = prev_email, error="Please enter a valid e-mail!")
 
         user = Users(username = request.form['username'], firstname=request.form['firstname'], lastname=request.form['lastname'])
         db.session.add(user)
