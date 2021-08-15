@@ -4,10 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 import os
 
-
-from sqlalchemy.sql.functions import count
-from sqlalchemy.sql.sqltypes import ARRAY
-
 app = Flask(__name__)
 app.config.from_pyfile('config.cfg')
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -57,8 +53,8 @@ def register():
             return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Username already in use!")
 
         # check if email is unique
-        #if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            #return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Email is already in use!")
+        if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
+            return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Email is already in use!")
         
         if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "" or request.form['email'] == "":
             return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Please fill in all fields for registration!")
@@ -77,38 +73,40 @@ def register():
     
     return render_template('register.html')
 
-@app.route('/edit/<user_id>/<delete>', methods=['GET', 'POST'])
-@app.route('/edit/<user_id>', methods=['GET', 'POST'], defaults={'delete': False})
-def edit(user_id,delete):
+@app.route('/edit/<user_id>/<do_delete>', methods=['GET', 'POST'])
+@app.route('/edit/<user_id>', methods=['GET', 'POST'], defaults={'do_delete': False})
+def edit(user_id,do_delete):
     user=Users.query.filter(Users.id == user_id).first()
 
-    print(request.method)
-    print(delete)
-
-    if delete:
+    if do_delete:
         user=Users.query.filter(Users.id == user_id).first()
         emails=Emaildb.query.filter(Emaildb.user_id == user_id).all()
         db.session.delete(user)
         for email in emails:
             db.session.delete(email)
         db.session.commit()
-        return render_template("edit.html", delete=delete, error="User \"{}\" deleted!".format(user.username))
+        return render_template("edit.html", do_delete=do_delete, error="User \"{}\" deleted!".format(user.username))
 
-    if request.method == "GET" and not(delete):
-        return render_template('edit.html', popText="TEXT", user=user)
+    if edit_email:
+        user=Users.query.filter(Users.id == user_id).first()
+        emails=Emaildb.query.filter(Emaildb.user_id == user_id).all()
+        db.session.delete(user)
+        for email in emails:
+            db.session.delete(email)
+        db.session.commit()
+        return render_template("edit.html", do_delete=do_delete, error="User \"{}\" deleted!".format(user.username))
+
+    if request.method == "GET" and not(do_delete):
+        return render_template('edit.html', user=user)
 
     if request.method == "POST":
-        if (Users.query.filter(func.lower(Users.username) == func.lower(request.form['username'])).count() >= 1) and (user.username != request.form['username']):
-            return render_template('edit.html', popText="TEXT", user=user, error="Username already in use!")
-        
-        if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "":
-            return render_template('edit.html', popText="TEXT", user=user, error="No fields should be left blank!")
+        if request.form['firstname'] == "" or request.form['lastname'] == "":
+            return render_template('edit.html', user=user, error="No fields should be left blank!")
 
-        #user.username = request.form['username']
         user.firstname = request.form['firstname']
         user.lastname = request.form['lastname']
         db.session.commit()
-        return render_template('edit.html', popText="TEXT", user=user)
+        return render_template('edit.html', user=user)
 
 #============================================================================
 #                           EDIT EMAILS PAGE

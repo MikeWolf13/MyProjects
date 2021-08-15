@@ -61,7 +61,10 @@
                   <td style="width: 45%;">
                     <h4 class="list-group-item-heading">{{ email.email }}</h4>
                   </td>
-                  <td style="width: 15%;"><a href="{{ url_for('editemail', user_id=user.id, delete_email=email.email) }}"  class="btn btn-primary" style="float: right;">Remove email</a></td>
+                  <td style="width: 13%;">
+                    <a href="{{ url_for('editemail', user_id=user.id, edit_email=email.email) }}"  class="btn btn-primary">Edit email</a>
+                    <a href="{{ url_for('editemail', user_id=user.id, delete_email=email.email) }}"  class="btn btn-primary" style="float: right;">Remove email</a>
+                  </td>
                 </tr>
               </table>
             </div>
