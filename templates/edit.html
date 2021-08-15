@@ -80,7 +80,7 @@
                       <div class="col-lg-10 col-lg-offset-2">
                         <button type="submit" formmethod="POST" class="btn btn-primary">Update</button>
                         <a href="{{ url_for('editemail', user_id=user.id) }}" class="btn btn-primary">ADD/REMOVE Emails</a>
-                        <a href="{{ url_for('edit', user_id=user.id, delete=True) }}" class="btn btn-primary">Delete user</a>
+                        <a href="{{ url_for('edit', user_id=user.id, delete=True) }}" class="btn btn-primary" onClick="return confirmSubmit('Do you want to delete {{ user.username }}?')">Delete user</a>
                         {% if error %}
                         <div style="color: red;">{{ error }}</div>
                         {% endif %}
@@ -96,6 +96,7 @@
           </div>
 
     </div> <!-- /container -->
-
+    <script LANGUAGE="JavaScript" src="{{ url_for('static', filename='thejs.js') }}">
+    </script>
   </body>
 </html>
