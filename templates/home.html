@@ -39,7 +39,7 @@
       <form class="form-horizontal" method="POST" action="{{ url_for('index') }}"> 
         <fieldset>
           <div class="form-group">
-            <label for="find_user" class="col-lg-3 control-label" style="font-size: 1em;">Search by: <img src="{{ url_for('static', filename='search.png') }}" height="16px">
+            <label for="find_user" class="col-lg-3 control-label" style="font-size: 1em;">Search by:
               <select name='search_by' style="color: black;">
                 <option value="1">username</option>
                 <option value="2">email</option>
@@ -47,7 +47,7 @@
             </label>
             <div>
               <div class="col-lg-3"><input type="text" class="form-control" name="find_user" placeholder="Search"></div>
-              <div><button type="submit" class="btn btn-primary">Search</button></div>
+              <div><button type="submit" class="btn btn-primary"> <img src="{{ url_for('static', filename='search.png') }}" height="13px" style="vertical-align: baseline;"> Search</button></div>
             </div>
           </div>
         </fieldset>
