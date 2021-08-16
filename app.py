@@ -30,7 +30,7 @@ def index():
 
         if request.form['find_user'] == '' or request.form['find_user'] == None:
             users = Users.query.order_by(func.lower(Users.firstname)).all()
-            return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], users=users)
+            return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], old_srch = request.form['find_user'], users=users)
         else:
             find_user = request.form['find_user']
             if request.form['search_by'] == '1':
@@ -41,7 +41,7 @@ def index():
                 users = db.session.query(Users).order_by(func.lower(Users.firstname)).filter(Users.id.in_(subquery)).all()
                 
             if users:
-                return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], users=users)
+                return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], old_srch = request.form['find_user'], users=users)
             else:
                 return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], error="No users found")
 
@@ -142,10 +142,10 @@ def emailcontrol(user_id,delete_email):
             return render_template('emailcontrol.html', user=user)
 
         if notemail(request.form['email']):
-            return render_template('emailcontrol.html', user=user, error="Please enter a valid e-mail!")
+            return render_template('emailcontrol.html', user=user, old_email=request.form['email'], error="Please enter a valid e-mail!")
 
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            return render_template('emailcontrol.html', user=user, error="Email is already in use!")
+            return render_template('emailcontrol.html', user=user, old_email=request.form['email'], error="Email is already in use!")
 
         addEmail = Emaildb(email=request.form['email'], user_id=user_id)
         db.session.add(addEmail)
