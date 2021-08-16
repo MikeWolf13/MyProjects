@@ -2,6 +2,7 @@ import re
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
+from check import notemail
 import os
 
 app = Flask(__name__)
@@ -51,51 +52,43 @@ def index():
 #============================================================================
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     
+    if request.method == 'GET':
+        return render_template('register.html')
+
     if request.method == 'POST':
+        error = None
         # check if username is unique
         if (Users.query.filter(func.lower(Users.username) == func.lower(request.form['username'])).count() >= 1):
-            return render_template('register.html', \
-                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
-                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
-                                    error="Username already in use!")
+            error="Username already in use!"
 
         if (' ' in request.form['username']):
-            return render_template('register.html', \
-                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
-                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
-                                    error="Username shouldn't have spaces!")
+            error="Username shouldn't have spaces!"
 
         # check if email is unique
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            return render_template('register.html', \
-                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
-                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
-                                    error="Email is already in use!")
+            error="Email is already in use!"
         
         if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "" or request.form['email'] == "":
-            return render_template('register.html', \
-                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
-                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
-                                    error="Please fill in all fields for registration!")
+            error="Please fill in all fields for registration!"
         
-        if not(re.fullmatch(regex, request.form['email'])):
+        if notemail(request.form['email']):
+            error="Please enter a valid e-mail!"
+        
+        if error:
             return render_template('register.html', \
                                     prev_user = request.form['username'], prev_first = request.form['firstname'], \
                                     prev_last = request.form['lastname'], prev_email = request.form['email'], \
-                                    error="Please enter a valid e-mail!")
-
-        user = Users(username = request.form['username'], firstname=request.form['firstname'], lastname=request.form['lastname'])
-        db.session.add(user)
-        db.session.commit()
-        user_new = Users.query.filter(Users.username == user.username).one()
-        email = Emaildb(email = request.form['email'], user_id=user_new.id)
-        db.session.add(email)
-        db.session.commit()
-        return redirect(url_for('index'))
-    
-    return render_template('register.html')
+                                    error = error)
+        else:     
+            user = Users(username = request.form['username'], firstname=request.form['firstname'], lastname=request.form['lastname'])
+            db.session.add(user)
+            db.session.commit()
+            user_new = Users.query.filter(Users.username == user.username).one()
+            email = Emaildb(email = request.form['email'], user_id=user_new.id)
+            db.session.add(email)
+            db.session.commit()
+            return redirect(url_for('index'))
 
 #============================================================================
 #                           EDIT USER PAGE
@@ -133,7 +126,6 @@ def edit(user_id,do_delete):
 @app.route('/emailcontrol/<user_id>', methods=['GET', 'POST'], defaults={'delete_email': ''})
 def emailcontrol(user_id,delete_email):
     user=Users.query.filter(Users.id == user_id).first()
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     
     if not(delete_email == '' or delete_email == None):
         if Emaildb.query.filter(Emaildb.user_id == user_id).count() > 1:
@@ -151,7 +143,7 @@ def emailcontrol(user_id,delete_email):
         if request.form['email'] == '' or request.form['email'] == None:
             return render_template('emailcontrol.html', user=user)
 
-        if not(re.fullmatch(regex, request.form['email'])):
+        if notemail(request.form['email']):
             return render_template('emailcontrol.html', user=user, error="Please enter a valid e-mail!")
 
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
