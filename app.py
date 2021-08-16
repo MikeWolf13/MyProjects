@@ -50,7 +50,16 @@ def register():
     if request.method == 'POST':
         # check if username is unique
         if (Users.query.filter(func.lower(Users.username) == func.lower(request.form['username'])).count() >= 1):
-            return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Username already in use!")
+            return render_template('register.html', \
+                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
+                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
+                                    error="Username already in use!")
+
+        if (' ' in request.form['username']):
+            return render_template('register.html', \
+                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
+                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
+                                    error="Username shouldn't have spaces!")
 
         # check if email is unique
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
@@ -128,7 +137,6 @@ def emailcontrol(user_id,delete_email):
             return render_template('emailcontrol.html', user=user, error="Please enter a valid e-mail!")
 
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            print(request.form['email'])
             return render_template('emailcontrol.html', user=user, error="Email is already in use!")
 
         addEmail = Emaildb(email=request.form['email'], user_id=user_id)
