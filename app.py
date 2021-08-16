@@ -15,12 +15,11 @@ db = SQLAlchemy(app)
 #============================================================================
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    sel1 = ""
-    sel2 = ""
+    sel1 = sel2 = ""
 
     if request.method == 'GET':
         sel1 = "selected"
-        users = Users.query.order_by(Users.firstname).all()
+        users = Users.query.order_by(func.lower(Users.firstname)).all()
         return render_template('home.html', sel1=sel1, sel2=sel2, users=users)
     
     if request.method == 'POST':
@@ -30,16 +29,16 @@ def index():
             sel2 = "selected"
 
         if request.form['find_user'] == '' or request.form['find_user'] == None:
-            users = Users.query.order_by(Users.firstname).all()
+            users = Users.query.order_by(func.lower(Users.firstname)).all()
             return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], users=users)
         else:
             find_user = request.form['find_user']
             if request.form['search_by'] == '1':
-                users = Users.query.order_by(Users.firstname).filter(Users.username.like("%" + find_user + "%")).all()
+                users = Users.query.order_by(func.lower(Users.firstname)).filter(Users.username.like("%" + find_user + "%")).all()
             
             if request.form['search_by'] == '2':
                 subquery = db.session.query(Emaildb.user_id).filter(Emaildb.email.like("%" + find_user + "%")).subquery()
-                users = db.session.query(Users).order_by(Users.firstname).filter(Users.id.in_(subquery)).all()
+                users = db.session.query(Users).order_by(func.lower(Users.firstname)).filter(Users.id.in_(subquery)).all()
                 
             if users:
                 return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], users=users)
@@ -152,7 +151,6 @@ def emailcontrol(user_id,delete_email):
         db.session.add(addEmail)
         db.session.commit()
         return render_template('emailcontrol.html', user=user)
-
 
 #============================================================================
 #                           EMAIL EDIT PAGE
