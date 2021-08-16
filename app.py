@@ -10,6 +10,9 @@ app.config['SECRET_KEY'] = os.urandom(24)
 
 db = SQLAlchemy(app)
 
+#============================================================================
+#                           INDEX/HOME PAGE
+#============================================================================
 @app.route('/', methods=['GET', 'POST'])
 def index():
     sel1 = ""
@@ -43,10 +46,13 @@ def index():
             else:
                 return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], error="No users found")
 
+#============================================================================
+#                           REGISTER USER PAGE
+#============================================================================
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-
+    
     if request.method == 'POST':
         # check if username is unique
         if (Users.query.filter(func.lower(Users.username) == func.lower(request.form['username'])).count() >= 1):
@@ -91,6 +97,9 @@ def register():
     
     return render_template('register.html')
 
+#============================================================================
+#                           EDIT USER PAGE
+#============================================================================
 @app.route('/edit/<user_id>/<do_delete>', methods=['GET', 'POST'])
 @app.route('/edit/<user_id>', methods=['GET', 'POST'], defaults={'do_delete': False})
 def edit(user_id,do_delete):
@@ -118,7 +127,7 @@ def edit(user_id,do_delete):
         return render_template('edit.html', user=user)
 
 #============================================================================
-#                           EDIT EMAILS PAGE
+#                           EMAIL CONTROL PAGE
 #============================================================================
 @app.route('/emailcontrol/<user_id>/<delete_email>', methods=['GET', 'POST'])
 @app.route('/emailcontrol/<user_id>', methods=['GET', 'POST'], defaults={'delete_email': ''})
@@ -153,6 +162,10 @@ def emailcontrol(user_id,delete_email):
         db.session.commit()
         return render_template('emailcontrol.html', user=user)
 
+
+#============================================================================
+#                           EMAIL EDIT PAGE
+#============================================================================
 @app.route('/editemail/<user_id>/<edit_email>', methods=['GET', 'POST'])
 def editemail(user_id,edit_email):
     user=Users.query.filter(Users.id == user_id).first()
