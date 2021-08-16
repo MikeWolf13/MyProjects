@@ -63,13 +63,22 @@ def register():
 
         # check if email is unique
         if (Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1):
-            return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Email is already in use!")
+            return render_template('register.html', \
+                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
+                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
+                                    error="Email is already in use!")
         
         if request.form['username'] == "" or request.form['firstname'] == "" or request.form['lastname'] == "" or request.form['email'] == "":
-            return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Please fill in all fields for registration!")
+            return render_template('register.html', \
+                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
+                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
+                                    error="Please fill in all fields for registration!")
         
         if not(re.fullmatch(regex, request.form['email'])):
-            return render_template('register.html', prev_user = request.form['username'], prev_first = request.form['firstname'], prev_last = request.form['lastname'], prev_email = request.form['email'], error="Please enter a valid e-mail!")
+            return render_template('register.html', \
+                                    prev_user = request.form['username'], prev_first = request.form['firstname'], \
+                                    prev_last = request.form['lastname'], prev_email = request.form['email'], \
+                                    error="Please enter a valid e-mail!")
 
         user = Users(username = request.form['username'], firstname=request.form['firstname'], lastname=request.form['lastname'])
         db.session.add(user)
