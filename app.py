@@ -16,10 +16,16 @@ db = SQLAlchemy(app)
 @app.route('/', methods=['GET', 'POST'])
 def index():
     sel1 = sel2 = ""
+    page = request.args.get('page', 1, type=int)
+    per_page = 8
 
     if request.method == 'GET':
         sel1 = "selected"
-        users = Users.query.order_by(func.lower(Users.firstname)).all()
+        
+        users = Users.query.order_by(func.lower(Users.firstname)).paginate(page=page,per_page=per_page)
+        print(users.per_page)
+
+        #users = Users.query.order_by(func.lower(Users.firstname)).all()
         return render_template('home.html', sel1=sel1, sel2=sel2, users=users)
     
     if request.method == 'POST':
@@ -29,16 +35,16 @@ def index():
             sel2 = "selected"
 
         if request.form['find_user'] == '' or request.form['find_user'] == None:
-            users = Users.query.order_by(func.lower(Users.firstname)).all()
+            users = Users.query.order_by(func.lower(Users.firstname)).paginate(page=page,per_page=per_page)
             return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], old_srch = request.form['find_user'], users=users)
         else:
             find_user = request.form['find_user']
             if request.form['search_by'] == '1':
-                users = Users.query.order_by(func.lower(Users.firstname)).filter(Users.username.like("%" + find_user + "%")).all()
+                users = Users.query.order_by(func.lower(Users.firstname)).filter(Users.username.like("%" + find_user + "%")).paginate(page=page,per_page=per_page)
             
             if request.form['search_by'] == '2':
                 subquery = db.session.query(Emaildb.user_id).filter(Emaildb.email.like("%" + find_user + "%")).subquery()
-                users = db.session.query(Users).order_by(func.lower(Users.firstname)).filter(Users.id.in_(subquery)).all()
+                users = db.session.query(Users).order_by(func.lower(Users.firstname)).filter(Users.id.in_(subquery)).paginate(page=page,per_page=per_page)
                 
             if users:
                 return render_template('home.html', sel1=sel1, sel2=sel2, search_val=request.form['search_by'], old_srch = request.form['find_user'], users=users)
