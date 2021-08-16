@@ -1,4 +1,3 @@
-import re
 from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
@@ -161,7 +160,6 @@ def emailcontrol(user_id,delete_email):
 @app.route('/editemail/<user_id>/<edit_email>', methods=['GET', 'POST'])
 def editemail(user_id,edit_email):
     user=Users.query.filter(Users.id == user_id).first()
-    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     email = Emaildb.query.filter(Emaildb.id == edit_email).one()
     the_email = email.email
 
@@ -169,9 +167,7 @@ def editemail(user_id,edit_email):
         return render_template('editemail.html', the_email=the_email, user=user, email=email)
 
     if request.method == 'POST':
-        print(the_email)
-        print(request.form['email'])
-        if not(re.fullmatch(regex, request.form['email'])) or request.form['email'] == '' or request.form['email'] == None:
+        if notemail(request.form['email']) or request.form['email'] == '' or request.form['email'] == None:
             return render_template('editemail.html', the_email=the_email, user=user, email=email, error="Please enter a valid e-mail!")
 
         if ((Emaildb.query.filter(func.lower(Emaildb.email) == func.lower(request.form['email'])).count() >= 1) and (not(str.lower(the_email) == str.lower(request.form['email'])))):
